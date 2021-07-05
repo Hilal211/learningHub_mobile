@@ -6,7 +6,7 @@ export default function Sections_class(props) {
     const [section, setSection] = useState([]);
     const[state,setState]=useState("");
     useEffect(() => {
-    fetch(`http://192.168.43.68:8000/api/sec-class/${props.idClass}`)
+    fetch(`http://192.168.8.150:8000/api/sec-class/${props.idClass}`)
       .then((response) => response.json())
       .then((json) => setSection(json))
       .catch((error) => console.error(error))
@@ -22,8 +22,8 @@ export default function Sections_class(props) {
     return (
 <View>
         <Picker
-        style={{width: 200}} 
-       selectedValue={state}
+                style={{ color: '#ff6347',width:200 }}
+                selectedValue={state}
          onValueChange={ (l)=>sendSection(l)
          }
         >

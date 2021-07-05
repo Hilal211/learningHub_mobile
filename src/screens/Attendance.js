@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { StyleSheet, View, Text, SafeAreaView, FlatList, ActivityIndicator, Picker ,TouchableOpacity} from 'react-native'
+import { StyleSheet, View, Text, SafeAreaView, FlatList, ActivityIndicator, Picker, TouchableOpacity ,ScrollView} from 'react-native'
 import Classes_List from '../components/classes_list';
 import Section_class from '../components/sections_class'
 import { DataTable } from 'react-native-paper';
+import axios from "react-native-axios";
 
 function Attendance() {
   const [isLoading, setLoading] = useState(true);
@@ -11,17 +12,62 @@ function Attendance() {
   const [section, setSection] = useState(null);
   const [student, setStudent] = useState([]);
   const [status, setStatus] = useState("");
+  const [attendance, setAttendance] = useState([]);
 
-  // sudo php artisan serve --host 192.168.43.68 --port 80
+  let today = new Date();
+  var days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  var d = new Date();
+  var dayName = days[d.getDay()];
 
+  // sudo php artisan serve --host 192.168.8.150 --port 80
 
+  const handleclick = async (id) => {
+    let reqBody = {
+      StudentId: id,
+      SectionId: section,
+      status: status,
+    };
+    setStatus("");
 
-  useEffect(() => {
-    fetch(`http://192.168.43.68:8000/api/studentbysection/${section}`)
+    try {
+      const l = await axios.post(`http://192.168.8.150:8000/api/addsattendance`, reqBody)
+
+      if (l) {
+        let attendance = [...student].filter(st => st.id !== id);
+        setStudent(attendance);
+      }
+    } catch (error) {
+      console.log("BIG Error : ", error);
+    }
+
+  }
+
+  const getStudentbyDate = async () => {
+    await axios.get(`http://192.168.8.150:8000/api/studentattendance`).then((res) => {
+      const result = res.data;
+      setAttendance(result);
+    });
+  };
+
+  const getstudentbysection = () => {
+    fetch(`http://192.168.8.150:8000/api/studentbysection/${section}`)
       .then((response) => response.json())
       .then((json) => setStudent(json))
       .catch((error) => console.error(error))
       .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    getstudentbysection(),
+      getStudentbyDate()
   }, [section]);
 
   const stclassf = (c) => {
@@ -31,10 +77,20 @@ function Attendance() {
     setSection(c)
   }
 
-
+  console.log('st', status)
   return (
+    <ScrollView>
 
     <View style={{ flex: 1, padding: 24 }}>
+      <Text style={styles.datee}>
+       {dayName +
+                      "-" +
+                      today.getFullYear() +
+                      "-" +
+                      (today.getMonth() + 1) +
+                      "-" +
+                      today.getDate()}
+                      </Text>
       <Classes_List onChange={stclassf
       } />
 
@@ -56,36 +112,39 @@ function Attendance() {
 
             </DataTable.Header>
 
-            {student.map(st => (
-             
+            {student.filter(student => {
+              return !attendance.find(item => {
+                return item.StudentId === student.id
+              })
+            }).map(st => (
+
               <DataTable.Row>
                 <DataTable.Cell>{st.FName}</DataTable.Cell>
                 <DataTable.Cell>{st.LName}</DataTable.Cell>
-                <DataTable.Cell>
-<View>
-                  <Picker
-                    style={{ width: 100 }}
-                    selectedValue={status}
-                    onValueChange={(l) => setStatus(l.value)
-                    }
-                  >
-                    <Picker.Item label="status" value={null} />
-                    <Picker.Item label="Present" value="Present" />
-                    <Picker.Item label="Late" value="Late" />
-                    <Picker.Item label="Absent" value="Absent" />
+                {/* <DataTable.Cell> */}
+                <Picker
+                  style={{ color: '#ff6347', width: 110 }}
+                  selectedValue={status}
+                  onValueChange={(l) => { setStatus(l) }
+                  }
+                >
+                  <Picker.Item label="status" value={null} />
+                  <Picker.Item label="Present" value="Present" />
+                  <Picker.Item label="Late" value="Late" />
+                  <Picker.Item label="Absent" value="Absent" />
 
 
-                  </Picker>
-                  </View>
+                </Picker>
 
-                </DataTable.Cell>
+                {/* </DataTable.Cell> */}
 
                 <DataTable.Cell>
                   <TouchableOpacity
-                    // style={styles.buttonContainer}
-                    // onPress={() => navigation.navigate('Attendance')}
-                    >
-                    <Text >Done</Text>
+                    style={styles.buttonContainer}
+                    onPress={() => handleclick(st.id)}
+                  >
+                    <Text style={{ color: '#fff'}}
+                    >Done</Text>
                   </TouchableOpacity>
 
                 </DataTable.Cell>
@@ -101,7 +160,26 @@ function Attendance() {
         </View>
         )}
     </View>
+    </ScrollView>
   );
 }
+const styles = StyleSheet.create({
 
+  buttonContainer: {
+    backgroundColor: '#ff6347',
+    borderRadius: 10,
+    padding:6 ,
+    margin: 2,
+    textAlign: 'center'
+  },
+ datee:{
+  color:'#ff6347',
+  fontSize:25,
+  textAlign:'center',
+  backgroundColor:"#fff",
+  fontWeight:"bold",
+  padding:10,
+  borderRadius:10
+ }
+})
 export default Attendance

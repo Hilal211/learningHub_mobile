@@ -5,21 +5,7 @@ import homepic from '../../assets/graduation-hat.png'
 function Home(props) {
 
     const { navigation } = props
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-
-
     
-    const fadeIn = () => {
-       
-        Animated.loop( Animated.timing(fadeAnim, {
-              toValue:1,
-              duration: 500
-            })).start( )
-          
-      };
-    
-     
-
   return (
     <View style={styles.container}>
         <Image source={homepic} style={{ width: 200, height: 200 }}/>
@@ -42,22 +28,7 @@ function Home(props) {
 
 
 
-      <SafeAreaView style={styles.container}>
-      <Animated.View
-        style={[
-          styles.fadingContainer,
-          {
-            // Bind opacity to animated value
-            opacity: fadeAnim
-          }
-        ]}
-      >
-        <Text style={styles.fadingText}>Fading View!</Text>
-      </Animated.View>
-      <View style={styles.buttonRow}>
-        <Button title="Fade In View" onPress={fadeIn} />
-      </View>
-    </SafeAreaView>
+     
 
 
     
@@ -81,9 +52,8 @@ const styles = StyleSheet.create({
   buttonContainer: {
     backgroundColor: '#ff6347',
     borderRadius: 10,
-    padding: 10,
+    padding:10,
     margin: 20,
-    width:150,
     textAlign:'center'
   },
   buttonText: {
@@ -92,18 +62,7 @@ const styles = StyleSheet.create({
     textAlign:'center'
   },
 
-  fadingContainer: {
-    padding: 20,
-    backgroundColor: "powderblue"
-  },
-  fadingText: {
-    fontSize: 28
-  },
-  buttonRow: {
-    flexBasis: 100,
-    justifyContent: "space-evenly",
-    marginVertical: 16
-  }
+
 
 
 })

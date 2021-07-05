@@ -1,36 +1,60 @@
-import React,{useState,useEffect} from 'react';
-import { Text, View, StyleSheet,Picker } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Text, View, StyleSheet, Picker, Button,ScrollView } from 'react-native';
 import Classes_List from '../components/classes_list';
-import Section_class from '../components/sections_class'
-// import DatePicker from 'react-native-date-picker'
-import DateTimePicker from '@react-native-community/datetimepicker';
-
-// import Constants from 'expo-constants';
-
-// You can import from local files
+import Section_class from '../components/sections_class';
 import DropDownPicker from 'react-native-dropdown-picker'
+import PieChart from '../components/PieChart'
+import Chart from '../components/Chart'
+import DateTimePicker from "@react-native-community/datetimepicker";
+import axios from 'react-native-axios';
 
-import { VictoryPie, VictoryTooltip, VictoryLabel, VictoryChart, VictoryScatter, VictoryTheme,VictoryGroup,VictoryBar } from "./Victory";
 export default function Report() {
-  const[reportAll,setReportAll]=useState([])
+  const [reportAll, setReportAll] = useState([])
   const [isLoading, setLoading] = useState(true);
   const [classs, setClasss] = useState(null);
   const [section, setSection] = useState(null);
-  // const [date, setDate] = useState(new Date())
+  const [date, setDate] = useState(new Date())
+  const [data, setData] = useState([]);
+
+  const [mode, setMode] = useState("date");
+  const [show, setShow] = useState(false);
 
 
 
-  function reportAlls(){
-    fetch('http://192.168.43.68:8000/api/countallstudentattendance')
-      .then((response) => response.json())
-      .then((json) => setReportAll(json))
-      .catch((error) => console.error(error))
-      .finally(() => setLoading(false));
+
+  function formatDate(date) {
+    var d = new Date(date),
+      month = "" + (d.getMonth() + 1),
+      day = "" + d.getDate(),
+      year = d.getFullYear();
+
+    if (month.length < 2) month = "0" + month;
+    if (day.length < 2) day = "0" + day;
+    return [year, month, day].join("-");
   }
 
+  const handleclick = async (id) => {
+    const d = formatDate(date);
+    let reqBody = {
+      SectionId: section,
+      date: d,
+    };
+
+    try {
+      const l = await axios.post(
+        "http://192.168.8.150:8000/api/countbystatus",
+        reqBody
+      );
+      const result = l.data;
+      setData(result);
+    } catch (error) {
+      console.log("BIG Error : ", error);
+    }
+  };
+
   useEffect(() => {
-    reportAlls();
-  }, []);
+    handleclick();
+  }, [date]);
 
   const stclassf = (c) => {
     setClasss(c)
@@ -39,28 +63,12 @@ export default function Report() {
     setSection(c)
   }
 
-const[state,setState]=useState("");
-console.log(state);
-
-const data={
-  actual:[
-      {x:'Week1',y:30},
-      {x:'Week2',y:50},
-      {x:'Week3',y:60}
-
-  ]
-}
-
-
-
-
-const [date, setDate] = useState(new Date(1598051730000));
-  const [mode, setMode] = useState('date');
-  const [show, setShow] = useState(false);
+  const [state, setState] = useState("");
+  console.log(state);
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
-    setShow(Platform.OS === 'ios');
+    setShow(Platform.OS === "ios");
     setDate(currentDate);
   };
 
@@ -70,26 +78,30 @@ const [date, setDate] = useState(new Date(1598051730000));
   };
 
   const showDatepicker = () => {
-    showMode('date');
+    showMode("date");
   };
 
-  const showTimepicker = () => {
-    showMode('time');
-  };
+
+
+
+
+
+
+
   return (
     <View>
-<Classes_List onChange={stclassf
+      <ScrollView>
+      <Classes_List onChange={stclassf
       } />
 
       <Section_class idClass={classs}
-        onChange={stsectionf}/>
+        onChange={stsectionf} />
 
-<View>
-      <View>
-        <Button onPress={showDatepicker} title="Show date picker!" />
-      </View>
-      <View>
-        <Button onPress={showTimepicker} title="Show time picker!" />
+
+      <View style={styles.time} >
+        <Button color="tomato"
+          onPress={showDatepicker}
+           title="Choose Date:" />
       </View>
       {show && (
         <DateTimePicker
@@ -101,35 +113,10 @@ const [date, setDate] = useState(new Date(1598051730000));
           onChange={onChange}
         />
       )}
+      <Chart data={data} />
+      </ScrollView>
     </View>
 
-    {isLoading ? <Text>Loading...</Text> : 
-        (<View>
-            {/* <VictoryChart style={styles.victorychart}>
-        <VictoryBar
-         data={data}
-         x="name"
-        y="value"
-          style={{
-            data:{
-            fill:'orange'
-            }
-        }} />
-        </VictoryChart> */}
-        <VictoryPie 
-                    data={reportAll}
-                    x="value"
-                    y="value"
-
-         colorScale={["tomato", "orange", "green"]}
-         
-         />
-    
-       
-        </View>
-    )
-    }
-        </View>
   );
 }
 
@@ -147,4 +134,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  title: {
+    color: '#ff6347',
+    fontSize: 22,
+    textAlign: 'center',
+    backgroundColor: "#fff",
+    fontWeight: "bold",
+    padding: 10,
+    borderRadius: 10
+  },
+  time:{
+    width:150,
+    marginBottom:15,
+    color:"green"
+  }
 });

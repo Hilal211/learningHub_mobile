@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { StyleSheet, View, Text, SafeAreaView, FlatList, ActivityIndicator, Picker, TouchableOpacity ,ScrollView} from 'react-native'
+import { StyleSheet, View, Text, SafeAreaView, FlatList, ActivityIndicator, Picker, TouchableOpacity, ScrollView } from 'react-native'
 import Classes_List from '../components/classes_list';
 import Section_class from '../components/sections_class'
 import { DataTable } from 'react-native-paper';
 import axios from "react-native-axios";
-
+import StudentCard from "../components/StudentCard"
 function Attendance() {
   const [isLoading, setLoading] = useState(true);
   const [data, setData] = useState([]);
@@ -29,7 +29,7 @@ function Attendance() {
 
   // sudo php artisan serve --host 192.168.8.150 --port 80
 
-  const handleclick = async (id) => {
+  const handleclick = async (id, status) => {
     let reqBody = {
       StudentId: id,
       SectionId: section,
@@ -81,85 +81,58 @@ function Attendance() {
   return (
     <ScrollView>
 
-    <View style={{ flex: 1, padding: 24 }}>
-      <Text style={styles.datee}>
-       {dayName +
-                      "-" +
-                      today.getFullYear() +
-                      "-" +
-                      (today.getMonth() + 1) +
-                      "-" +
-                      today.getDate()}
-                      </Text>
-      <Classes_List onChange={stclassf
-      } />
+      <View style={{ flex: 1, padding: 24 }}>
+        <Text style={styles.datee}>
+          {dayName +
+            "-" +
+            today.getFullYear() +
+            "-" +
+            (today.getMonth() + 1) +
+            "-" +
+            today.getDate()}
+        </Text>
+        <Classes_List onChange={stclassf
+        } />
 
-      <Section_class idClass={classs}
-        onChange={stsectionf}
-      />
-      {isLoading ? <Text>Loading...</Text> :
-        (<View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between' }}>
-
-
-
-          <DataTable>
-
-            <DataTable.Header>
-              <DataTable.Title>First Name</DataTable.Title>
-              <DataTable.Title>Last Name</DataTable.Title>
-              <DataTable.Title>status</DataTable.Title>
-              <DataTable.Title>Action</DataTable.Title>
-
-            </DataTable.Header>
-
-            {student.filter(student => {
-              return !attendance.find(item => {
-                return item.StudentId === student.id
-              })
-            }).map(st => (
-
-              <DataTable.Row>
-                <DataTable.Cell>{st.FName}</DataTable.Cell>
-                <DataTable.Cell>{st.LName}</DataTable.Cell>
-                {/* <DataTable.Cell> */}
-                <Picker
-                  style={{ color: '#ff6347', width: 110 }}
-                  selectedValue={status}
-                  onValueChange={(l) => { setStatus(l) }
-                  }
-                >
-                  <Picker.Item label="status" value={null} />
-                  <Picker.Item label="Present" value="Present" />
-                  <Picker.Item label="Late" value="Late" />
-                  <Picker.Item label="Absent" value="Absent" />
+        <Section_class idClass={classs}
+          onChange={stsectionf}
+        />
+        {isLoading ? <Text>Loading...</Text> :
+          (<View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between' }}>
 
 
-                </Picker>
+            <DataTable>
 
-                {/* </DataTable.Cell> */}
+              <DataTable.Header>
+                <DataTable.Title>First Name</DataTable.Title>
+                <DataTable.Title>Last Name</DataTable.Title>
+                <DataTable.Title>status</DataTable.Title>
+                <DataTable.Title>Action</DataTable.Title>
 
-                <DataTable.Cell>
-                  <TouchableOpacity
-                    style={styles.buttonContainer}
-                    onPress={() => handleclick(st.id)}
-                  >
-                    <Text style={{ color: '#fff'}}
-                    >Done</Text>
-                  </TouchableOpacity>
+              </DataTable.Header>
 
-                </DataTable.Cell>
-              </DataTable.Row>
-            ))}
+              {student.filter(student => {
+                return !attendance.find(item => {
+                  return item.StudentId === student.id
+                })
+              }).map(st => (
+                <StudentCard
+                  FName={st.FName}
+                  LName={st.LName}
+                  id={st.id}
+                  handleclick={handleclick}
+                />
+              ))}
 
-          </DataTable>
+            </DataTable>
 
 
 
 
 
-        </View>
-        )}
-    </View>
+          </View>
+          )}
+      </View>
     </ScrollView>
   );
 }
@@ -168,18 +141,18 @@ const styles = StyleSheet.create({
   buttonContainer: {
     backgroundColor: '#ff6347',
     borderRadius: 10,
-    padding:6 ,
+    padding: 6,
     margin: 2,
     textAlign: 'center'
   },
- datee:{
-  color:'#ff6347',
-  fontSize:25,
-  textAlign:'center',
-  backgroundColor:"#fff",
-  fontWeight:"bold",
-  padding:10,
-  borderRadius:10
- }
+  datee: {
+    color: '#ff6347',
+    fontSize: 25,
+    textAlign: 'center',
+    backgroundColor: "#fff",
+    fontWeight: "bold",
+    padding: 10,
+    borderRadius: 10
+  }
 })
 export default Attendance
